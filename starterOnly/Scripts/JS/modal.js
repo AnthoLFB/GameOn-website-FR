@@ -29,8 +29,6 @@ const closeBtn = document.getElementById("closeModalBtn");
 closeBtn.addEventListener("click", closeModal);
 
 //Function to close the modal
-function closeModal()
-{
+function closeModal() {
   modalbg.style.display = "none";
 }
-
