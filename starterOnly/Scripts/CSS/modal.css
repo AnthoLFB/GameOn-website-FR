@@ -419,7 +419,6 @@ input[data-error]::after {
   color: #fff;
   position: relative;
   text-align: left;
-  min-width: 424px;
 }
 .hero-content::after {
   content: "";
@@ -481,6 +480,7 @@ footer {
   .hero-section {
     display: block;
     box-shadow: unset;
+
   }
   .hero-content {
     background: #fff;
@@ -499,7 +499,8 @@ footer {
   }
   .hero-text {
     width: unset;
-    font-size: 1.5rem;
+    font-size: 1em;
+    padding: 0;
   }
   .hero-img img {
     border-radius: 10px;
@@ -526,3 +527,18 @@ footer {
   }
 }
 
+/*Correction responsive*/
+@media screen and (max-width: 979px) {
+  .hero-headline
+  {
+    font-size: 2em;
+  }
+}
+
+@media screen and (max-width: 455px) {
+  .hero-text
+  {
+    font-size: 1em;
+    padding: 0;
+  }
+}
