@@ -9,41 +9,92 @@ class Constraint
         this.message = message
         this.idInput = idInput;
     }
+
+    triggerAnError()
+    {
+        if(this.domItem instanceof NodeList)
+        {
+
+            //Récupère le parent de l'input
+            var parentNode = this.domItem[0].parentNode;
+
+            //Applique une border sur cet element
+            parentNode.style.border = "Solid 3px red";
+            
+        }
+        else
+        {
+            this.domItem.style.border = "Solid 3px red";
+
+            //Récupère le parent de l'input
+            var parentNode = this.domItem.parentNode;
+
+        }
+
+        var elementExists = parentNode.getElementsByClassName("errorMessage");
+        var checkIfErrorMsgExist = document.body.contains(elementExists[0]);
+
+        if(checkIfErrorMsgExist == false)
+        {
+            //Création de l'élément
+            const newElt = document.createElement("div");
+
+            //Ajout d'une class erreur
+            newElt.classList.add("errorMessage");
+
+            //Ajout de l'élément dans le DOM
+            parentNode.appendChild(newElt); 
+
+            //Ajout du message
+            newElt.innerHTML = "<p>"+ this.message +"</p>";   
+        } 
+    }
+
+    removeErrorMessage()
+    {
+        if(this.domItem instanceof NodeList)
+        {
+
+            //Récupère le parent de l'input
+            var parentNode = this.domItem[0].parentNode;
+
+            //Applique une border sur cet element
+            parentNode.style.border = "Solid 3px green";
+            
+        }
+        else
+        {
+            this.domItem.style.border = "Solid 3px green";
+
+            //Récupère le parent de l'input
+            var parentNode = this.domItem.parentNode;
+
+        }
+
+        var elementExists = parentNode.getElementsByClassName("errorMessage");
+        var checkIfErrorMsgExist = document.body.contains(elementExists[0]);
+        
+        if(checkIfErrorMsgExist == true)
+        {
+            const elements = parentNode.getElementsByClassName("errorMessage");
+            elements[0].parentNode.removeChild(elements[0]);
+        } 
+    }
 }
 
 // Class to check if a field is empty
 class notBlank extends Constraint
 {
-    constructor(domItem, message, idInput)
-    {
-        super(domItem, message, idInput);
-    }
-
     isValid()
     {
         if(this.domItem.value.trim() == "")
         {
-            this.domItem.style.border = "Solid 3px red";
-
-           //Récupère le parent de l'input
-           const parentNode = document.getElementById(this.idInput).parentNode;
-
-           //Création de l'élément
-           const newElt = document.createElement("div");
-
-           //Ajout d'une class erreur
-           newElt.classList.add("errorMessage");
-
-           //Ajout de l'élément dans le DOM
-           parentNode.appendChild(newElt); 
-
-           //Ajout du message
-           newElt.innerHTML = "<p>"+ this.message +"</p>";
-
-           return false;
+            this.triggerAnError();
+            return false;
         }
         else
         {
+            this.removeErrorMessage();
             return true;
         }
     }
@@ -52,9 +103,9 @@ class notBlank extends Constraint
 // Class allowing to check if the length of the entered strings
 class CheckLength extends Constraint
 {
-    constructor(domItem, message, minLength, idInput)
+    constructor(domItem, message, minLength)
     {
-        super(domItem, message, idInput);
+        super(domItem, message);
         this.minLength = minLength;
     }
     
@@ -62,28 +113,13 @@ class CheckLength extends Constraint
     {
         if(this.domItem.value.trim().length < this.minLength)
         {
-            this.domItem.style.border = "Solid 3px red";
-
-            //Récupère le parent de l'input
-           const parentNode = document.getElementById(this.idInput).parentNode;
-
-           //Création de l'élément
-           const newElt = document.createElement("div");
-
-           //Ajout d'une class erreur
-           newElt.classList.add("errorMessage");
-
-           //Ajout de l'élément dans le DOM
-           parentNode.appendChild(newElt); 
-
-           //Ajout du message
-           newElt.innerHTML = "<p>"+ this.message +"</p>";
-
-           return false;
+            this.triggerAnError();
+            return false;
         }
         else
         {
             return true;
+            this.removeErrorMessage();
         }
     }
 }
@@ -91,38 +127,18 @@ class CheckLength extends Constraint
 // Class to check if the data entered are e-mail addresses
 class EmailVerification extends Constraint
 {
-    constructor(domItem, message, idInput)
-    {
-        super(domItem, message, idInput);
-    }
-
     isValid()
     {
         const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
         if(regex.test(this.domItem.value))
         {
+            this.removeErrorMessage();
             return true;
         }
         else
         {
-            this.domItem.style.border = "Solid 3px red";
-            
-            //Récupère le parent de l'input
-            const parentNode = document.getElementById(this.idInput).parentNode;
-
-            //Création de l'élément
-            const newElt = document.createElement("div");
-
-            //Ajout d'une class erreur
-            newElt.classList.add("errorMessage");
-
-            //Ajout de l'élément dans le DOM
-            parentNode.appendChild(newElt); 
-
-            //Ajout du message
-            newElt.innerHTML = "<p>"+ this.message +"</p>";
-
+            this.triggerAnError();
             return false;
         }
     }
@@ -130,11 +146,6 @@ class EmailVerification extends Constraint
 
 class CheckingDate extends Constraint
 {
-    constructor(domItem, message, idInput)
-    {
-        super(domItem, message, idInput);
-    }
-
     isValid()
     {
         const dateformat = /^\d{4}[\/\-](0[1-9]|1[012])[\/\-](0[1-9]|[12][0-9]|3[01])$/;
@@ -142,154 +153,37 @@ class CheckingDate extends Constraint
         // regex match
         if(this.domItem.value.match(dateformat))
         {
-            // separator test ('/' or '-')
-            var caseSlashSplit = this.domItem.split('/');
-            var caseDashSplit = this.domItem.split('-');
+            let todayDate = new Date;
 
-            caseSlashSplit = caseSlashSplit.length;
-            caseDashSplit = caseDashSplit.length;
+            var userDate = this.domItem.value.split('-');
 
-            // Depending on the separator used, the value is assigned to the variable
-            if(caseSlashSplit > 1)
-            {
-                var userDate = this.domItem.split('/');
-            }
-            else if(caseDashSplit > 1)
-            {
-                var userDate = this.domItem.split('-');
-            }
-
-            var day = parseInt(userDate[2]);
-            var month  = parseInt(userDate[1]);
             var year = parseInt(userDate[0]);
-            
-            // Creation of a list with the days of each month [not leap years]
-            var ListofDays = [31,28,31,30,31,30,31,31,30,31,30,31];
-            
-            if(month == 1 || month > 2)
+
+            if(isNaN(Date.parse(this.domItem.value)) || Date.parse(this.domItem.value) > Date.parse(todayDate))
             {
-                if(day > ListofDays[month - 1])
-                {
-                    this.domItem.style.border = "Solid 3px red";
-
-                    //Récupère le parent de l'input
-                    const parentNode = document.getElementById(this.idInput).parentNode;
-
-                    //Création de l'élément
-                    const newElt = document.createElement("div");
-
-                    //Ajout d'une class erreur
-                    newElt.classList.add("errorMessage");
-
-                    //Ajout de l'élément dans le DOM
-                    parentNode.appendChild(newElt); 
-
-                    //Ajout du message
-                    newElt.innerHTML = "<p>"+ this.message +"</p>";
-
-                    return false;
-                }
-            }
-            
-            if(month == 2)
-            {
-                var leapYear = false;
-                if((!(year % 4) && year % 100) || !(year % 400)) 
-                {
-                    leapYear = true;
-                }
-            
-                if((leapYear==false) && (day>=29))
-                {
-                    this.domItem.style.border = "Solid 3px red";
-
-                    //Récupère le parent de l'input
-                    const parentNode = document.getElementById(this.idInput).parentNode;
-
-                    //Création de l'élément
-                    const newElt = document.createElement("div");
-
-                    //Ajout d'une class erreur
-                    newElt.classList.add("errorMessage");
-
-                    //Ajout de l'élément dans le DOM
-                    parentNode.appendChild(newElt); 
-
-                    //Ajout du message
-                    newElt.innerHTML = "<p>"+ this.message +"</p>";
-
-                    return false;
-                }
-            
-                if((leapYear==true) && (day>29))
-                {
-                    this.domItem.style.border = "Solid 3px red";
-
-                    //Récupère le parent de l'input
-                    const parentNode = document.getElementById(this.idInput).parentNode;
-
-                    //Création de l'élément
-                    const newElt = document.createElement("div");
-
-                    //Ajout d'une class erreur
-                    newElt.classList.add("errorMessage");
-
-                    //Ajout de l'élément dans le DOM
-                    parentNode.appendChild(newElt); 
-
-                    //Ajout du message
-                    newElt.innerHTML = "<p>"+ this.message +"</p>";
-
-                    return false;
-                }
-            }
-
-            // The date must not be greater than the date the form was sent
-            var dayOfSending = new Date();
-            var parsedayOfSending = Date.parse(dayOfSending);
-            var parseBirthDate = Date.parse(this.domItem);
-
-            if(parseBirthDate > parsedayOfSending)
-            {
-                this.domItem.style.border = "Solid 3px red";
-
-                //Récupère le parent de l'input
-                const parentNode = document.getElementById(this.idInput).parentNode;
-
-                //Création de l'élément
-                const newElt = document.createElement("div");
-
-                //Ajout d'une class erreur
-                newElt.classList.add("errorMessage");
-
-                //Ajout de l'élément dans le DOM
-                parentNode.appendChild(newElt); 
-
-                //Ajout du message
-                newElt.innerHTML = "<p>"+ this.message +"</p>";
-
+                this.triggerAnError();
                 return false;
+            }
+            else
+            {
+                this.removeErrorMessage();
+            }
+
+            if(year >= (todayDate.getFullYear() - 18))
+            {
+                this.message = "Vous devez être majeur pour vous inscrire."
+                this.triggerAnError();
+                return false;
+            }
+            else
+            {
+                this.removeErrorMessage();
+                return true
             }
         }
         else
         {
-            this.domItem.style.border = "Solid 3px red";
-
-            //Récupère le parent de l'input
-            const parentNode = document.getElementById(this.idInput).parentNode;
-
-            //Création de l'élément
-            const newElt = document.createElement("div");
-
-            //Ajout d'une class erreur
-            newElt.classList.add("errorMessage");
-
-            //Ajout de l'élément dans le DOM
-            parentNode.appendChild(newElt); 
-
-            //Ajout du message
-            newElt.innerHTML = "<p>"+ this.message +"</p>";
-
+            this.triggerAnError();
             return false;
         }
     }
@@ -298,36 +192,16 @@ class CheckingDate extends Constraint
 // Class to check if the data input are numeric.
 class CheckingNumericValue extends Constraint
 {
-    constructor(domItem, message, idInput)
-    {
-        super(domItem, message, idInput);
-    }
-
     isValid()
     {
         if (isNaN(this.domItem.value))
         {
-            this.domItem.style.border = "Solid 3px red";
-
-            //Récupère le parent de l'input
-            const parentNode = document.getElementById(this.idInput).parentNode;
-
-            //Création de l'élément
-            const newElt = document.createElement("div");
-
-            //Ajout d'une class erreur
-            newElt.classList.add("errorMessage");
-
-            //Ajout de l'élément dans le DOM
-            parentNode.appendChild(newElt); 
-
-            //Ajout du message
-            newElt.innerHTML = "<p>"+ this.message +"</p>";
-
+            this.triggerAnError();
             return false;
         }
         else
         {
+            this.removeErrorMessage();
             return true;
         }
     }
@@ -336,37 +210,28 @@ class CheckingNumericValue extends Constraint
 // Class to manage radio buttons
 class CheckingRadioBtn extends Constraint
 {
-    constructor(domItem, message, idInput)
-    {
-        super(domItem, message, idInput);
-    }
-
     isValid()
     {
-        if(this.domItem == null)
+        let i;
+        let check = false;
+
+        for(i = 0; i < this.domItem.length; i++) 
         {
-            //Récupère le parent de l'input
-            const parentNode = document.getElementById(this.idInput).parentNode;
+            if(this.domItem[i].checked) 
+            {
+              check = true;
+            }
+        }
 
-            parentNode.style.border = "Solid 3px red";
-
-            //Création de l'élément
-            const newElt = document.createElement("div");
-
-            //Ajout d'une class erreur
-            newElt.classList.add("errorMessage");
-
-            //Ajout de l'élément dans le DOM
-            parentNode.appendChild(newElt); 
-
-            //Ajout du message
-            newElt.innerHTML = "<p>"+ this.message +"</p>";
-
+        if(check == false)
+        {
+            this.triggerAnError();
             return false;
         }
         else
         {
-            return true
+            this.removeErrorMessage();
+            return true;
         }
     }
 }
@@ -374,47 +239,16 @@ class CheckingRadioBtn extends Constraint
 // Class to manage checkboxes
 class CheckingCheckbox extends Constraint
 {
-    constructor(domItem, message, idInput)
-    {
-        super(domItem, message, idInput);
-    }
-
-    IsCheckedAndRequired()
+    isValid()
     {
         if(this.domItem.checked == false)
         {
-            //Récupère le parent de l'input
-            const parentNode = document.getElementById(this.idInput).parentNode;
-
-            //Création de l'élément
-            const newElt = document.createElement("div");
-
-            //Ajout d'une class erreur
-            newElt.classList.add("errorMessage");
-
-            //Ajout de l'élément dans le DOM
-            parentNode.appendChild(newElt); 
-
-            //Ajout du message
-            newElt.innerHTML = "<p>"+ this.message +"</p>";
-
+            this.triggerAnError();
             return false;
         }
         else
         {
-            return true
-        }
-    }
-
-    IsCheckedButNotRequired()
-    {
-        if(this.domItem == false)
-        {
-            console.log(this.message);
-            return true
-        }
-        else
-        {
+            this.removeErrorMessage();
             return true
         }
     }
@@ -433,59 +267,45 @@ form.addEventListener("submit", function(event)
 })
 
 /*--- Data processing---*/
+// Recovery of DOM elements
+const firstName = document.getElementById("firstName");
+const lastName = document.getElementById("lastName");
+const email = document.getElementById("email")
+const birthDate = document.getElementById("birthDate");
+const numberOfTournaments = document.getElementById("numberOfTournaments");
+const tournamentLocations =  document.getElementsByName("location");
+const termsOfUse = document.getElementById("termsOfUse");
+
+let constraints = [
+    new notBlank(firstName, "Le champ prénom ne doit pas être vide !"),
+    new CheckLength(firstName, "Veuillez entrer 2 caractères ou plus pour le champ prénom.", 2),
+    new notBlank(lastName, "Le champ nom ne doit pas être vide !"),
+    new CheckLength(lastName, "Veuillez entrer 2 caractères ou plus pour le champ nom.", 2),
+    new EmailVerification(email, "L'adresse e-mail n'est pas valide !"),
+    new CheckingDate(birthDate, "La date de naissance n'est pas valide !"),
+    new CheckingNumericValue(numberOfTournaments, "La valeur saisie n'est pas une valeur numérique !"),
+    new notBlank(numberOfTournaments, "Ce champ ne doit pas être vide !"),
+    new CheckingRadioBtn(tournamentLocations, "Veuillez renseigner une ville s'il vous plait !"),
+    new CheckingCheckbox(termsOfUse, "Vous devez accepter les conditions d'utilisation avant de nous transmettre votre inscription.")    
+];
+
 function validate()
 {
-    // Recovery of DOM elements
-    const firstName = document.getElementById("firstName");
-    const lastName = document.getElementById("lastName");
-    const email = document.getElementById("email")
-    const birthDate = document.getElementById("birthDate");
-    const numberOfTournaments = document.getElementById("numberOfTournaments");
-    const tournamentLocations =  document.querySelector('input[name="location"]:checked');
-    const termsOfUse = document.getElementById("termsOfUse").checked;
-    const beNotified = document.getElementById("beNotified").checked;
+    let errorCount = 0;
+    constraints.forEach(element => {
+        element =  element.isValid();
+        if(element == false)
+        {
+            errorCount++;
+        }
+    });
 
-    
-    // Tests of the different elements of the DOM
-
-    //prénom
-    const firsNameBlankTest = new notBlank(firstName, "Le champ prénom ne doit pas être vide !", "firstName");
-    firsNameBlankTest.isValid();
-
-    const firsNameLengthTest = new CheckLength(firstName, "Veuillez entrer 2 caractères ou plus pour le champ prénom.", 2, "firstName");
-    firsNameLengthTest.isValid();
-
-    //Nom de famille
-    const lastNameBlankTest = new notBlank(lastName, "Le champ nom ne doit pas être vide !", "lastName");
-    lastNameBlankTest.isValid();
-
-    const lastNameLengthTest = new CheckLength(lastName, "Veuillez entrer 2 caractères ou plus pour le champ nom.", 2, "lastName");
-    lastNameLengthTest.isValid();
-
-    //Email
-    const emailValidityTest = new EmailVerification(email, "L'adresse e-mail n'est pas valide !", "email");
-    emailValidityTest.isValid();
-
-    //Date
-    const birthDateTest = new CheckingDate(birthDate, "La date de naissance n'est pas valide !", "birthDate");
-    birthDateTest.isValid();
-
-    //Nombre de tournois
-    const numberOfTournamentsTest = new CheckingNumericValue(numberOfTournaments, "La valeur saisie n'est pas une valeur numérique !", "numberOfTournaments");
-    numberOfTournamentsTest.isValid();
-
-    //Localisation des tournois
-    const tournamentLocationsTest = new CheckingRadioBtn(tournamentLocations, "Veuillez renseigner une ville s'il vous plait !", "propositions");
-    tournamentLocationsTest.isValid();
-
-    //Conditions générales
-    const termsOfUseTest = new CheckingCheckbox(termsOfUse, "Vous devez accepter les conditions d'utilisation avant de nous transmettre votre inscription.", "termsOfUse");
-    termsOfUseTest.IsCheckedAndRequired();
-
-    //Notifications
-    const beNotifiedTest = new CheckingCheckbox(beNotified, "Vous ne souhaitez pas être prévenu des prochains évènements");
-    beNotifiedTest.IsCheckedButNotRequired();
-
-    /*alert(firstName+" "+lastName+" "+email+" "+birthDate+" "+numberOfTournaments+" "+termsOfUse+" "+beNotified+" "+tournamentLocations);*/
-}
-
+    if(errorCount >= 1)
+    {
+        return false;
+    }
+    else
+    {
+        alert("Votre inscription a bien été prise en compte.");
+    }
+};
