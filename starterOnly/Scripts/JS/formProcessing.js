@@ -83,7 +83,7 @@ class Constraint
 }
 
 // Class to check if a field is empty
-class notBlank extends Constraint
+class NotBlank extends Constraint
 {
     isValid()
     {
@@ -277,14 +277,14 @@ const tournamentLocations =  document.getElementsByName("location");
 const termsOfUse = document.getElementById("termsOfUse");
 
 let constraints = [
-    new notBlank(firstName, "Le champ prénom ne doit pas être vide !"),
+    new NotBlank(firstName, "Le champ prénom ne doit pas être vide !"),
     new CheckLength(firstName, "Veuillez entrer 2 caractères ou plus pour le champ prénom.", 2),
-    new notBlank(lastName, "Le champ nom ne doit pas être vide !"),
+    new NotBlank(lastName, "Le champ nom ne doit pas être vide !"),
     new CheckLength(lastName, "Veuillez entrer 2 caractères ou plus pour le champ nom.", 2),
     new EmailVerification(email, "L'adresse e-mail n'est pas valide !"),
     new CheckingDate(birthDate, "La date de naissance n'est pas valide !"),
     new CheckingNumericValue(numberOfTournaments, "La valeur saisie n'est pas une valeur numérique !"),
-    new notBlank(numberOfTournaments, "Ce champ ne doit pas être vide !"),
+    new NotBlank(numberOfTournaments, "Ce champ ne doit pas être vide !"),
     new CheckingRadioBtn(tournamentLocations, "Veuillez renseigner une ville s'il vous plait !"),
     new CheckingCheckbox(termsOfUse, "Vous devez accepter les conditions d'utilisation avant de nous transmettre votre inscription.")    
 ];
