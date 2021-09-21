@@ -80,14 +80,10 @@ class Constraint
             elements[0].parentNode.removeChild(elements[0]);
         } 
     }
-}
 
-// Class to check if a field is empty
-class NotBlank extends Constraint
-{
     isValid()
     {
-        if(this.domItem.value.trim() == "")
+        if(this.validate() == false)
         {
             this.triggerAnError();
             return false;
@@ -96,6 +92,19 @@ class NotBlank extends Constraint
         {
             this.removeErrorMessage();
             return true;
+        }
+        
+    }
+}
+
+// Class to check if a field is empty
+class NotBlank extends Constraint
+{
+    validate()
+    {
+        if(this.domItem.value.trim() == "")
+        {
+            return false;
         }
     }
 }
@@ -109,17 +118,11 @@ class CheckLength extends Constraint
         this.minLength = minLength;
     }
     
-    isValid()
+    validate()
     {
         if(this.domItem.value.trim().length < this.minLength)
         {
-            this.triggerAnError();
             return false;
-        }
-        else
-        {
-            return true;
-            this.removeErrorMessage();
         }
     }
 }
@@ -127,18 +130,12 @@ class CheckLength extends Constraint
 // Class to check if the data entered are e-mail addresses
 class EmailVerification extends Constraint
 {
-    isValid()
+    validate()
     {
         const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-        if(regex.test(this.domItem.value))
+        if(!regex.test(this.domItem.value))
         {
-            this.removeErrorMessage();
-            return true;
-        }
-        else
-        {
-            this.triggerAnError();
             return false;
         }
     }
@@ -146,7 +143,7 @@ class EmailVerification extends Constraint
 
 class CheckingDate extends Constraint
 {
-    isValid()
+    validate()
     {
         const dateformat = /^\d{4}[\/\-](0[1-9]|1[012])[\/\-](0[1-9]|[12][0-9]|3[01])$/;
 
@@ -161,29 +158,17 @@ class CheckingDate extends Constraint
 
             if(isNaN(Date.parse(this.domItem.value)) || Date.parse(this.domItem.value) > Date.parse(todayDate))
             {
-                this.triggerAnError();
                 return false;
-            }
-            else
-            {
-                this.removeErrorMessage();
             }
 
             if(year >= (todayDate.getFullYear() - 18))
             {
                 this.message = "Vous devez être majeur pour vous inscrire."
-                this.triggerAnError();
                 return false;
-            }
-            else
-            {
-                this.removeErrorMessage();
-                return true
             }
         }
         else
         {
-            this.triggerAnError();
             return false;
         }
     }
@@ -192,17 +177,11 @@ class CheckingDate extends Constraint
 // Class to check if the data input are numeric.
 class CheckingNumericValue extends Constraint
 {
-    isValid()
+    validate()
     {
-        if (isNaN(this.domItem.value))
+        if (isNaN(this.domItem.value) || this.domItem.value == "")
         {
-            this.triggerAnError();
             return false;
-        }
-        else
-        {
-            this.removeErrorMessage();
-            return true;
         }
     }
 }
@@ -210,7 +189,7 @@ class CheckingNumericValue extends Constraint
 // Class to manage radio buttons
 class CheckingRadioBtn extends Constraint
 {
-    isValid()
+    validate()
     {
         let i;
         let check = false;
@@ -225,13 +204,7 @@ class CheckingRadioBtn extends Constraint
 
         if(check == false)
         {
-            this.triggerAnError();
             return false;
-        }
-        else
-        {
-            this.removeErrorMessage();
-            return true;
         }
     }
 }
@@ -239,17 +212,11 @@ class CheckingRadioBtn extends Constraint
 // Class to manage checkboxes
 class CheckingCheckbox extends Constraint
 {
-    isValid()
+    validate()
     {
         if(this.domItem.checked == false)
         {
-            this.triggerAnError();
             return false;
-        }
-        else
-        {
-            this.removeErrorMessage();
-            return true
         }
     }
 }
@@ -284,7 +251,6 @@ let constraints = [
     new EmailVerification(email, "L'adresse e-mail n'est pas valide !"),
     new CheckingDate(birthDate, "La date de naissance n'est pas valide !"),
     new CheckingNumericValue(numberOfTournaments, "La valeur saisie n'est pas une valeur numérique !"),
-    new NotBlank(numberOfTournaments, "Ce champ ne doit pas être vide !"),
     new CheckingRadioBtn(tournamentLocations, "Veuillez renseigner une ville s'il vous plait !"),
     new CheckingCheckbox(termsOfUse, "Vous devez accepter les conditions d'utilisation avant de nous transmettre votre inscription.")    
 ];
@@ -293,19 +259,12 @@ function validate()
 {
     let errorCount = 0;
     constraints.forEach(element => {
-        element =  element.isValid();
-        if(element == false)
-        {
-            errorCount++;
-        }
+        errorCount += element.isValid() ? 0 : 1;
     });
 
-    if(errorCount >= 1)
+    if(errorCount < 1)
     {
-        return false;
-    }
-    else
-    {
-        alert("Votre inscription a bien été prise en compte.");
+        closeModal();
+        createMessage();
     }
 };
